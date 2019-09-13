@@ -1,19 +1,16 @@
 package com.example.teste.Entidade;
 
 import java.io.Serializable;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.validation.constraints.Size;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-
+@SequenceGenerator(name = "id", sequenceName = "id", allocationSize = 1, initialValue = 2)
 @Entity
 @Table(name = "tb_estado")
 public class Estado implements Serializable{
@@ -21,7 +18,7 @@ public class Estado implements Serializable{
 	private static final long serialVersionUID = 1L;
 
     @Id 
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(generator = "id")
     private Long id;
     
     @Size(max = 6)
@@ -32,7 +29,7 @@ public class Estado implements Serializable{
     private String status;
     
     @Column(name = "data")
-    private LocalDate data;
+    private String data;
 	
 	@Column(name= "versao")
 	private String versao;
@@ -45,11 +42,11 @@ public class Estado implements Serializable{
     	this.id = id;
     }
 
-    public LocalDate getData() {
+    public String getData() {
         return data;
     }
 
-    public void setData(LocalDate data) {
+    public void setData(String data) {
         this.data = data;
     }
 	
