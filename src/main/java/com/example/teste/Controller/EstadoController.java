@@ -1,6 +1,8 @@
 package com.example.teste.Controller;
 
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import com.example.teste.Entidade.Estado;
@@ -49,7 +51,6 @@ public class EstadoController {
                 aux = aux.replace("<td>", "");
                 String[] aux2 = aux.split("<\\/td>");
                 estados = aux2[0];
-                String data = doc.select(".fonte10").get(0).text().replace("- Última Verificação: ", "").replace(" - WebServices Versões 3.10 ou anteriores", "");
                 
                 if (aux2[1].contains("bola_vermelho_P")) {
                     status = EStatus.VERMELHO.getDescricao();
@@ -58,9 +59,9 @@ public class EstadoController {
                 } else {
                     status = EStatus.AMARELO.getDescricao();
                 }
-                
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/YYYY HH:mm:ss");
                 estado.setStatus(status);
-                estado.setData(data);
+                estado.setData(LocalDateTime.now().format(formatter));
                 estado.setEstaUf(estados);
                 repository.save(estado);
             }
