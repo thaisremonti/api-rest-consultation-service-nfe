@@ -4,6 +4,7 @@ package com.example.teste.Controller;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Optional;
 
 import com.example.teste.Entidade.Estado;
 import com.example.teste.Enum.EStatus;
@@ -14,27 +15,28 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
 @RestController
-@RequestMapping(value="/api")
+@RequestMapping(value = "/api")
 public class EstadoController {
 
     @Autowired
     Repository repository;
 
-    @GetMapping("status")
-    public List<Estado> lista(){
+    @GetMapping("listaTodos")
+    public List<Estado> listaTodos() {
         return repository.findAll();
     }
 
-    //@GetMapping("porEstado/{id}")
-    //public Estado listaEstados(@PathVariable(value="estaUf") Long id){
-        //return repository.findById(id)
-    //}
-
+    @GetMapping("porEstado/{id}")
+    public Optional<Estado> listaEstados(@PathVariable(value="id") Long id){
+        return repository.findById(id);
+    }
 
 
     @PostMapping("teste")
