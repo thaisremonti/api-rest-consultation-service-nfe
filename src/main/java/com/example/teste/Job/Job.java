@@ -20,7 +20,7 @@ public class Job {
     private static final Logger log = LoggerFactory.getLogger(Job.class);
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
 
-    @Scheduled(fixedRate = 39999)
+    @Scheduled(fixedRate = 300000)
     public void reportCurrentTime() {
         estado.teste();
         log.info("Job  Historico", dateFormat.format(new Date()));

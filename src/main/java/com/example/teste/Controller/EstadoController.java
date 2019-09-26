@@ -1,8 +1,7 @@
 package com.example.teste.Controller;
 
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -13,7 +12,9 @@ import com.example.teste.Repository.Repository;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -34,7 +35,7 @@ public class EstadoController {
     }
 
     @GetMapping("porEstado/{id}")
-    public Optional<Estado> listaEstados(@PathVariable(value="id") Long id){
+    public Optional<Estado> listaEstados(@PathVariable(value = "id") Long id) {
         return repository.findById(id);
     }
 
@@ -47,7 +48,7 @@ public class EstadoController {
             String status;
             String estados;
             
-            for (Element b : doc.select(".linhaImparCentralizada")) {
+            for (Element b : doc.select(".linhaImparCentralizada, .linhaParCentralizada")) {
                 Estado estado = new Estado();
                 String aux = b.html();
                 aux = aux.replace("<td>", "");
@@ -61,10 +62,12 @@ public class EstadoController {
                 } else {
                     status = EStatus.AMARELO.getDescricao();
                 }
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/YYYY HH:mm:ss");
+                
+                Element caption = getCaptionVersion(doc);
                 estado.setStatus(status);
-                estado.setData(LocalDateTime.now().format(formatter));
+                estado.setData(getdataUltimaAtualizacao(caption));
                 estado.setEstaUf(estados);
+                estado.setVersao(getVersao(caption).getVersao());
                 repository.save(estado);
             }
             
@@ -78,4 +81,46 @@ public class EstadoController {
         return repository.save(estado);
     }
 
+    private Element getCaptionVersion(Element table) {
+        Elements caption = table.getElementsByTag("caption");
+        return caption.stream()
+            .filter(tag -> tag.getElementsByTag("span").size() > 0)
+            .map(tag -> tag.getElementsByTag("span").get(0)).findFirst().get();
+    }
+
+    private String getdataUltimaAtualizacao(Element caption) {
+        String value = caption.text();
+
+        if (value != null && !value.isEmpty()) {
+            String[] values = value.split("-");
+            String stringData = Arrays.asList(values).stream()
+                .filter(text -> text.contains("Última Verificação"))
+                .findFirst()
+                .map(text -> {
+                    String formatado = text.replaceAll("Última Verificação: ", "");
+                    return formatado.trim();
+                }).get();
+                return stringData;
+        }
+        return null;
+    }
+    
+    private Estado getVersao(Element caption) {
+        Estado estado = new Estado();
+        String value = caption.text();
+
+        if (value != null && !value.isEmpty()) {
+            String[] values = value.split("-");
+            String versao = Arrays.asList(values).stream()
+                .filter(text -> {
+                    return text.contains("WebServices Vers");
+                })
+                .map(text -> {
+                    String pattern = "[^0-9+.]";
+                    return text.replaceAll(pattern, "");
+                }).findFirst().orElse(null);
+                estado.setVersao(versao);
+        }
+        return estado;
+    }
 }
